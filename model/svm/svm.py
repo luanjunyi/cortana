@@ -11,14 +11,15 @@ due to >= O(N^2) where N is number of trainning samples in libsvm's implementati
 from sklearn.svm import (SVC,LinearSVC)
 import cPickle as pickle
 from util import *
+from util.log import _logger
 import codecs
 import argparse
 
 def linear_train(modelfile,trainmatfile,vs='1vsR',C=1,regularize='l2',gridsearch=False):
     ""
 
-    log._logger.info("linear_train : %s " % (modelfile))
-    log._logger.info("Loading...")
+    _logger.info("linear_train : %s " % (modelfile))
+    _logger.info("Loading...")
 
     trainX = pickle.load(open(conv.redirect(trainmatfile)))
     trainy = [r[1] for r in tsv.reader(conv.redirect("data|train.dat"))]
@@ -26,7 +27,7 @@ def linear_train(modelfile,trainmatfile,vs='1vsR',C=1,regularize='l2',gridsearch
     # Optimation
     trainX = trainX.tocsr(False)
     
-    log._logger.info("Training...")
+    _logger.info("Training...")
     if vs == '1vsR':
         if regularize == 'l1':
             clf = LinearSVC(loss='l2',penalty='l1',dual=False,C=C)
@@ -39,7 +40,7 @@ def linear_train(modelfile,trainmatfile,vs='1vsR',C=1,regularize='l2',gridsearch
         
     clf.fit(trainX,trainy)
     
-    log._logger.info("Dumping to %s" % (modelfile))
+    _logger.info("Dumping to %s" % (modelfile))
     
     pickle.dump(clf,open(modelfile,'w'))
     
@@ -54,7 +55,7 @@ def test(modelfile,testmatfile,outfile):
     testX = pickle.load(open(conv.redirect(testmatfile)))
     testy = [r[1] for r in tsv.reader(conv.redirect("data|test.dat"))]
     
-    log._logger.info("Testing...")
+    _logger.info("Testing...")
     predicts = clf.predict(testX)
     
     with codecs.open(outfile,'w',encoding='utf-8') as fl:

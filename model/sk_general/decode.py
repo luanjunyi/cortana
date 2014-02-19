@@ -19,16 +19,33 @@ from feat.terms.term_categorize import term_category
 from train import CLFs, Vectorizer
 
 def serv(clf):
-    domains = clf.named_steps['clf'].classes_
+    vert = clf.named_steps['vert']
+    analyzer = vert.build_analyzer()
+    svm = clf.named_steps['clf']
+    domains = svm.classes_
     while True:
         query = raw_input('Input your query(must be segmented by SPACE), q to quit:\n').decode('utf-8')
         if query == u'q':
             return
         detail = sorted(zip(domains, clf.decision_function([query])[0]),
-                        key = lambda x: -x[1])
+                        key = lambda x: -x[1])[:4]
         print 'result:', clf.predict([query])[0], '\n'
+        top_domains = set()
         for domain, val in detail:
             print domain, val
+            top_domains.add(domain)
+
+        print '%40s\t' % "TERM" + '\t'.join(["%8s" % domain for domain in domains if domain in top_domains])
+
+        tokens = analyzer(query)
+        for token in tokens:
+            if token not in vert.vocabulary_:
+                continue
+            idx = vert.vocabulary_[token]
+            arr = ['%40s' % token]
+            arr.extend(["%8.4f" % svm.coef_[di, idx] for di, domain in enumerate(domains) if domain in top_domains])
+            print '\t'.join(arr)
+        
 
 def test(test_file_path, clf):
     X, y = load_data(test_file_path)

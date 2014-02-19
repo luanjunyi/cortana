@@ -1,7 +1,6 @@
 import sys, os
 import numpy as np
 from feat.terms.term_categorize import term_category
-from sklearn.feature_extraction.text import TfidfVectorizer
 from util.log import _logger
 
 TEST_FILE_PATH = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + "/../data/aggregated/test.dat")
@@ -37,6 +36,7 @@ class Tokenizer(object):
 
 class Analyzer(object):
     def __init__(self):
+        from sklearn.feature_extraction.text import TfidfVectorizer
         self.tfidf = TfidfVectorizer(min_df = 1, binary = False, ngram_range = (1, 3),
                                      tokenizer = Tokenizer())
         self.tokens = self.tfidf.build_tokenizer()
@@ -50,6 +50,9 @@ class Analyzer(object):
             if term != cate:
                 ret.append(cate)
         return ret
+
+__all__ = ["argmax", "load_data", "Tokenizer", "Analyzer", "TEST_FILE_PATH", "TRAIN_FILE_PATH",
+           "tsv", "conv"]
 
 
 
